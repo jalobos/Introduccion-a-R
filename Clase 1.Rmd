@@ -1,0 +1,389 @@
+---
+title: "Sesión: Nivelación de R"
+author: "Javiera Lobos"
+output:
+html_document:
+---
+
+# R y R Studio: Qué, cómo y por qué
+
+## ¿Qué  es R, R Studio y por qué esta ganando tanta popularidad?
+- R  es un software de código abierto, y R studio es su IDE, es decir, una interfaz para ocupar R de manera más amigable. El hecho que sea abierto es la primera razón por la cual se está masificando mucho en las ciencias sociales, sin embargo, uno de los fuertes de este software es la programación literada, la  facilidad para compartir resultados (reproducible research) y la visualzación de datos
+
+
+## ¿Que características hacen de R tan especial ?
+- Permite documentar a medida que vas haciendo tu trabajo (Adios combinación excel-word)
+- Permite escribir formulas $E=m c ^2$
+- Permite escribir los gráficos estáticos e interactivos 
+- Permite hacer [Dashboards](https://rmarkdown.rstudio.com/flexdashboard/examples.html)
+- Permite hacer los beamer y words directamente de los resultados
+
+```{r widgets}
+library(dygraphs)
+library(xts) 
+dygraph(nhtemp, main = "New Haven Temperatures") %>% 
+  dyRangeSelector(dateWindow = c("1920-01-01", "1960-01-01"))
+```
+
+### Elementos básicos
+- **Librerías** : R posee diversas librerías que permiten la amplicación de sus funcionalidades básicas y se encuentra en constante renovación. Para ver una lista de todos los paquetes que se encuentran disponibles, revisar [CRAN]( https://cran.r-project.org/web/packages/available_packages_by_name.html)
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+```
+- **Script/Markdown** 
+
+R Markdown es un formato de archivo para hacer documentos dinámicos con R. Un documento R Markdown está escrito en markdown (un formato de texto plano fácil de escribir) y contiene fragmentos de código R incrustado, como éste código. 
+
+- **Project** 
+
+Workspace para cada proyecto que tengas. 
+
+###Tipos de datos 
+- **logical**
+```{r}
+x <- TRUE
+class(x)
+```
+-  **Integer: Números enteros**
+```{r}
+x <- 1L
+class(x)
+```
+
+- **Numeric: Datos numéricos** 
+```{r}
+x <- 2.6
+class(x)
+```
+
+- **Factor: Datos categóricos**
+```{r}
+x <- factor(c("male", "female", "female", "male"))
+class(x)
+```
+
+- **Character: Texto (strings)**
+```{r}
+x <- "Hello World"
+class(x)
+```
+
+###Tipos de estructura
+
+- **Vector**
+Vector es la estructura de datos más común y básica en R.Son datos del mismo tipo de datos ordenados en una lista. Podemos crear un vector de la siguiente manera
+```{r}
+z<-c(1,2.5,4,8)
+z
+```
+
+- **Matrix**
+Se caracteriza por ser bidimensional. Para definir una matriz a partir de un vector, la sintaxis es matriz (vector, nrow, ncol, byrow). Byrow define como se llena. 
+```{r}
+x<- matrix(1:20, nrow=5, ncol=4, byrow=TRUE)
+x
+```
+
+- **Array**
+Se comporta como una matriz, pero es multidimensional (más de 2). 
+
+```{r}
+x<- array(1:12, c(2,3,2))
+x
+```
+
+
+- **Dataframe**
+Formato más utilizado, permite visualizar la base de datos como un excel. 
+```{r}
+df <- data.frame(
+  type = c("A", "B", "C"),
+  NC   = c(100,122,130),
+  SC   = c(200,220,250),
+  NY   = c(300,320, 380))
+df
+```
+
+LLamamos un elemento 
+```{r}
+df[1,2]
+```
+
+Llamamos un columna completa
+```{r, echo=TRUE}
+df[,2]
+df$NC
+```
+
+Llamamos una fila completa
+```{r}
+df[1,]
+```
+
+Llamamos un intervalo completo 
+```{r}
+df[,2:4]
+```
+
+
+
+# Primera parte: Limpiar una base de datos
+Cuando importamos una base de datos, no solo hay que buscar que los datos puedan ser leidos por el programa, sino que sea tecnicamente correcto.
+
+## Importar una base de datos
+
+
+Comandos usuales para importar una base de datos
+
++ read.csv para valores separados por coma con un punto como indicador de decimales.
++ read.csv2 para valores separados por punti con una coma como indicador de decimales.
++ read.delim Separados por tab con un punto de separador de decimales
++ read.delim2 Separads por tab con una coma de separador de decimales
+
+Luego de importarlos, debo saber si es funcional: Long, Wide
+```{r}
+library(readxl)
+titanic <- read_excel("~/Desktop/titanic.xlsx")
+```
+
+Survived : nominal - indicates whether a person survived the titanic or not
+Pclass : ordinal - indicates the ticket class of the person, ie "first", "second", or "third" class
+Sex : nominal - indicated the sex of the passenger
+Age : Numeric - indicates age
+SibSP : Numeric - indicates the number of siblings or spouses related to the passanger onboard
+Parch : Numeric - indicates the number of parents related to the passanger onboard
+Ticket : nominal - ticket number of the passanger 
+Fare : Numeric - the amount paid for their ticket by the passanger
+Cabin : nominal - the cabin number of the passanger
+Embarked : nominal - indicates from what port the passanger embarked from
+
+
+## Tipos de datos
+
+Principalmente, usaremos 3 tipos de datos:
+
++ as.numeric : Datos numericos.
++ as.factor : Datos categóricos.
++ as.character: Strings
+
+Otros que existen son:
+
++ as.logical: Datos logical
++ as.ordered: Datos ordinales
+
+A veces la lectura de las variables puede no ser correcto, por lo que tenemos que adaptarlo.
+
+
+```{r}
+str(titanic)
+titanic$Survived<-as.factor(titanic$Survived)
+```
+
+
+```{r}
+str(titanic)
+summary(titanic)
+#Hacemos los cambios correspondientes
+titanic$Pclass<-as.factor(titanic$Pclass)
+titanic$Sex<-as.factor(titanic$Sex)
+titanic$Age<-as.numeric(titanic$Age)
+titanic$Fare<-as.numeric(titanic$Fare)
+titanic$Survived<-as.numeric(titanic$Survived)
+
+
+```
+
+========== Sesion 3=============
+## Limpiar una base de datos:
+### Identificacion missings
+
+En cuanto al tratamiento de los missings
+
+```{r}
+#Identifico las variables que tienen NA
+colSums(is.na(titanic))
+
+#Hago estadistica con eso
+sum(titanic$Age)
+median(titanic$Age)
+mean(titanic$Age)
+
+
+sum(titanic$Age,na.rm = TRUE)
+mean(titanic$Age, na.rm = TRUE)
+median(titanic$Age, na.rm = TRUE)
+
+#Si quiero, puedo cambiar todos los NA por el promedio
+
+titanic$Age[is.na(titanic$Age)] = mean(titanic$Age, na.rm = TRUE)
+
+```
+El tratamiento de los missings es casuistico y dependerá de la naturaleza del problema. En general, se hacer 3 cosas: Se imputa la base de datos, se elimina la variable o se trabaja con ella igualmente. 
+De todas formas, es importante que cuando falten datos, identificar si acaso existe un patron al respecto. 
+
+### Outliers
+```{r}
+boxplot(titanic$Age)
+boxplot(titanic$Fare)
+boxplot(titanic$SibSp)
+```
+
+## Familia Apply
+
+```{r}
+library(dplyr)
+tit_numeric=select_if(titanic, is.numeric)
+sapply(tit_numeric, function(x) min(x))
+
+sapply(tit_numeric, function(x) mean(x, na.rm = TRUE))
+sapply(tit_numeric, function(x) length(unique(x)))
+sapply(tit_numeric, function(x) hist(x,  labels = TRUE))
+pairs(tit_numeric)
+
+
+```
+
+
+## Paquete Dplyr
+
+```{r}
+#install.packages("dplyr")
+library(dplyr)
+```
+En general, los comandos que más se utilizan son: 
+ 
++ filter() para seleccionar valores basados en condiciones
++ arrange() para reordenar la base 
++ select() para seleccionar variables en base a los nombres
++ mutate() para agregar a nuevas variables sobre la base de otra variables
++ group_by() agrupo variables de acuerdo a algún criterio. 
++ summarise() para crear una variable sobre una agrupación
++sample_n() and sample_frac() to take random samples.
+
+Paquete dplyr: Ejemplos
+========================================================
+Calcularemos el porcentaje de sobrevivencia por sexo
+```{r}
+titanic %>% group_by(Sex) %>% summarise(mean(Survived, na.rm = TRUE)*100)
+```
+
+Calcularemos  el porcentaje de sobrevivencia por clase
+
+```{r}
+titanic %>% group_by(Pclass)  %>% summarise(mean(Survived)*100) 
+```
+
+```{r}
+titanic  %>% group_by(Pclass, Sex)  %>% summarise(mean(Survived)*100)
+```
+
+Calcularemos el porcentaje de sobrevivencia por clase por sexo
+```{r}
+
+```
+
+Calcularemos cuánto pagaron en promedio por clase aquellos que sobrevivieron
+```{r}
+ titanic %>% filter(Survived==1) %>% group_by(Pclass) %>% summarise(mean(Fare))
+
+
+```
+
+Filtraremos aquellos que son hombres
+```{r}
+titanic %>%  filter(Sex=="male") %>%  summarise(mean(Fare))
+
+```
+
+
+Filtraremos aquellos que son hombres que sobrevivieron
+```{r}
+titanic %>%  filter(Sex=="male" & Survived==1) %>% group_by(Pclass)  %>%  summarise(mean(Fare))
+
+```
+
+Crearemos una variable que tome valor 1 cuando el pasajero no tenga familia a bordo y 0 en caso contrario, 
+```{r}
+titanic<-titanic %>%  mutate(acompanado=ifelse(SibSp>0,1,0))
+
+```
+
+
+
+si(condicion;true,false)
+
+
+
+
+##Graficos
+ggplot es uno de los paquetes principales para generar graficos en R
+
+Primero, haremos un grafico del monto promedio que se gastaron por genero
+```{r}
+library(ggplot2)
+library(plotly)
+
+
+titanic %>% group_by(Sex, Pclass)  %>% summarise(promedio=mean(Fare)) %>% ggplot(aes(fill=Pclass, y=promedio, x=Sex)) + 
+    geom_bar( stat="identity")
+
+
+grafico3<-titanic %>% group_by(Sex, Pclass)  %>% summarise(promedio=mean(Fare)) %>% ggplot(aes(fill=Pclass, y=promedio, x=Sex)) + 
+    geom_bar( stat="identity") + theme_light()
+
+
+
+ggplotly(grafico3)
+```
+
+
+##Visualizaciones para estadistica descriptiva
+```{r}
+library("GGally")                      
+ggpairs(tit_numeric)
+pairs(data)                           
+```
+
+## Segunda Parte: Correlaciones
+
+Puede ser util ver antes algunas correlaciones
+```{r}
+cor(tit_numeric)
+```
+
+
+###Ejercicio práctico
+
+Utilizaremos una base de datos que se encuentra pre-cargada en las bases de R
+```{r}
+#Primero, limpio la base de datos
+rm(list=ls())
+data("USArrests")
+colnamesd
+head(USArrests)
+
+```
+Analizo la base de datos 
+```{r}
+```
+
+Crear un vector con SOLO la tasa de homicidios
+```{r}
+homicidios<-USArrests$Murder 
+```
+
+Sacar la estadistica de la tasa de de homicios promedios en EE, la tasa minima y la tasa maxima. 
+```{r}
+
+```
+
+5. Hacer una base de datos donde la poblacion sea mayor a 75
+```{r}
+```
+
+6. Hacer un gráfico
+
+```{r}
+
+```
